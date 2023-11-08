@@ -161,7 +161,7 @@ const ThreeScene: React.FC = () => {
 
       setTimeout(() => {
         cyMaterial.setValues({ emissive: "red" });
-      }, 10000);
+      }, 5000);
 
       let red = true;
       const toggleBG = () => {
