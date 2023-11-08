@@ -43,12 +43,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <link rel="apple-touch-icon" href="/icon.png" />
         <meta name="theme-color" content="#e0c8fd" />
 
-        <meta property="og:title" content="Nextjs App" />
-        <meta name="twitter:title" content="Nextjs App" />
+        <meta property="og:title" content="Hiso Motors App" />
+        <meta name="twitter:title" content="Hiso Motors App" />
 
-        <meta name="description" content="Nextjs 13 starter template" />
-        <meta property="og:description" content="Nextjs 13 starter template" />
-        <meta name="twitter:description" content="Nextjs 13 starter template" />
+        <meta name="description" content="Hiso Motors 13 starter template" />
+        <meta property="og:description" content="Hiso Motors 13 starter template" />
+        <meta name="twitter:description" content="Hiso Motors 13 starter template" />
 
         <meta property="og:image" content="https://i.imgur.com/Z3bMJXy.jpg" />
         <meta name="twitter:image" content="https://i.imgur.com/Z3bMJXy.jpg" />

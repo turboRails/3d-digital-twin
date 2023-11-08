@@ -13,5 +13,6 @@ const nextConfig = withPWA({
     dirs: ['src'],
     ignoreDuringBuilds: true,
   },
-});
+})
+
 module.exports = nextConfig;
