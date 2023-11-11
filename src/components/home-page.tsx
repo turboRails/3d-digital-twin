@@ -21,21 +21,21 @@ const ThreeScene: React.FC = () => {
     if (typeof window !== "undefined" && canvasRef.current != undefined) {
       const width = window.innerWidth;
       const height = window.innerHeight * 0.8;
-      const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 9000);
-      camera.position.set(0, 8, 35);
+      const camera = new THREE.PerspectiveCamera(60, width / height, 1, 5000);
+      camera.position.set(-15, 15, 30);
+      // camera.lookAt(-20, 0, 0);
+
 
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0x000104); //BB4136
 
-      const parent = new THREE.Object3D();
-      scene.add(parent);
       const grid = new THREE.Points(
         new THREE.PlaneGeometry(15000, 15000, 128, 256),
         new THREE.PointsMaterial({ color: 0xff0000, size: 10 })
       );
       grid.position.y = -800;
       grid.rotation.x = -Math.PI / 2;
-      parent.add(grid);
+      scene.add(grid);
 
       const renderer = new THREE.WebGLRenderer({
         canvas: canvasRef.current,
@@ -70,14 +70,17 @@ const ThreeScene: React.FC = () => {
       // ambientLight.position.set(1, 3, 1);
       // scene.add(ambientLight);
 
-      const pointLight = new THREE.DirectionalLight(0xffffff, 8);
-      const spotLight = new THREE.SpotLight(0xffffff, 100, 10, 30);
+      // const pointLight = new THREE.DirectionalLight(0xffffff, 8);
+      const pointLight = new THREE.SpotLight(0xffffff, 100, 10, 30);
 
-      spotLight.position.set(5, -5, 4);
-      spotLight.lookAt(0, 0, 0);
-      scene.add(spotLight);
+      pointLight.position.set(5, -5, 6);
+      pointLight.lookAt(0, 0, 0);
+      scene.add(pointLight);
 
       const controls = new OrbitControls(camera, renderer.domElement);
+     controls.target.x = -12      
+     controls.target.y = 4
+     controls.update();
 
       const fillWithPoints = (
         geometry: THREE.BufferGeometry,
@@ -215,8 +218,8 @@ const ThreeScene: React.FC = () => {
         pointsGeom.setAttribute("color", new THREE.BufferAttribute(colorsA, 3));
         // stats.update();
 
+        cube.rotation.y += 0.001
         renderer.render(scene, camera);
-        controls.update();
 
         requestAnimationFrame(renderScene);
       };
