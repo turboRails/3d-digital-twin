@@ -4,7 +4,7 @@ import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-// import Stats from "three/addons/libs/stats.module.js";
+import Stats from "three/addons/libs/stats.module.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 
 const effectController = {
@@ -16,23 +16,16 @@ const effectController = {
 const ThreeScene: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const controlRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     if (typeof window !== "undefined" && canvasRef.current != undefined) {
-      const camera = new THREE.PerspectiveCamera(
-        60,
-        canvasRef.current.getBoundingClientRect().width /
-          canvasRef.current.getBoundingClientRect().height,
-        0.1,
-        9000
-      );
+      const width = window.innerWidth;
+      const height = window.innerHeight * 0.8;
+      const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 9000);
       camera.position.set(0, 8, 35);
 
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0x000104); //BB4136
-      // scene.fog = new THREE.FogExp2( 0x004404, 0.0001675 );
-
-      const clock = new THREE.Clock();
 
       const parent = new THREE.Object3D();
       scene.add(parent);
@@ -49,10 +42,7 @@ const ThreeScene: React.FC = () => {
         antialias: true,
         alpha: true,
       });
-      renderer.setSize(
-        canvasRef.current.getBoundingClientRect().width,
-        canvasRef.current.getBoundingClientRect().height
-      );
+      renderer.setSize(width, height);
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.autoClear = false;
       const cyGeometry = new THREE.CylinderGeometry(
@@ -62,25 +52,30 @@ const ThreeScene: React.FC = () => {
         24,
         24
       ).toNonIndexed();
+      cyGeometry.computeBoundingBox();
+      const bbox = cyGeometry.boundingBox;
+
       const cyMaterial = new THREE.MeshStandardMaterial({
         color: "white",
         transparent: true,
-        opacity: 0.6,
-        metalness: 0.5,
+        opacity: 0.3,
+        emissive: "gray",
       });
 
       const cube = new THREE.Mesh(cyGeometry, cyMaterial);
       cube.position.set(0, 5, 0);
       scene.add(cube);
 
-      const ambientLight = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 0.3);
-      ambientLight.position.set(1, 3, 1);
+      // const ambientLight = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 0.3);
+      // ambientLight.position.set(1, 3, 1);
+      // scene.add(ambientLight);
 
-      scene.add(ambientLight);
-      const pointLight = new THREE.DirectionalLight(0xffffff, 5);
-      pointLight.position.set(40, 0, -1);
-      pointLight.lookAt(0, 20, 0);
-      scene.add(pointLight);
+      const pointLight = new THREE.DirectionalLight(0xffffff, 8);
+      const spotLight = new THREE.SpotLight(0xffffff, 100, 10, 30);
+
+      spotLight.position.set(5, -5, 4);
+      spotLight.lookAt(0, 0, 0);
+      scene.add(spotLight);
 
       const controls = new OrbitControls(camera, renderer.domElement);
 
@@ -88,6 +83,10 @@ const ThreeScene: React.FC = () => {
         geometry: THREE.BufferGeometry,
         count: number
       ) => {
+        const dir = new THREE.Vector3(1, 1, 1).normalize();
+        const ray = new THREE.Ray();
+        const pVec3: THREE.Vector3[] = [];
+
         const isInside = (v: THREE.Vector3) => {
           ray.set(v, dir);
           let counter = 0;
@@ -108,30 +107,16 @@ const ThreeScene: React.FC = () => {
           return counter % 2 == 1;
         };
         const dummyTarget = new THREE.Vector3(); // to prevent logging of warnings from ray.at() method
-
-        const ray = new THREE.Ray();
-
-        const size = new THREE.Vector3();
-        geometry.computeBoundingBox();
-        let bbox = geometry.boundingBox;
-
-        let pVec3: THREE.Vector3[] = [];
-
-        const dir = new THREE.Vector3(1, 1, 1).normalize();
-        for (let i = 0; i < count; i++) {
-          let v = new THREE.Vector3(
-            THREE.MathUtils.randFloat(
-              (bbox?.min.x || 0) * 0.8,
-              (bbox?.max.x || 0) * 0.8
-            ),
-            THREE.MathUtils.randFloat(bbox?.min.y || 0, bbox?.max.y || 0),
-            THREE.MathUtils.randFloat(
-              (bbox?.min.z || 0) * 0.8,
-              (bbox?.max.z || 0) * 0.8
-            )
-          );
-          if (isInside(v)) {
-            pVec3.push(v);
+        if (bbox) {
+          for (let i = 0; i < count; i++) {
+            let v = new THREE.Vector3(
+              THREE.MathUtils.randFloat(bbox.min.x * 0.8, bbox.max.x * 0.8),
+              THREE.MathUtils.randFloat(bbox?.min.y || 0, bbox?.max.y || 0),
+              THREE.MathUtils.randFloat(bbox.min.z * 0.8, bbox.max.z * 0.8)
+            );
+            if (isInside(v)) {
+              pVec3.push(v);
+            }
           }
         }
         return new THREE.BufferGeometry().setFromPoints(pVec3);
@@ -141,27 +126,32 @@ const ThreeScene: React.FC = () => {
         cyGeometry,
         effectController.particleCount
       );
-      
-      const pointMat = new THREE.PointsMaterial({ vertexColors: true, color: 'aqua',size: 0.25})
-      var colors=[];
-       const vertices = pointsGeom.getAttribute("position").array
-       for (var i = 0; i < vertices.length; i++) {
-          colors.push(0 , 1 , 1)
-       }
-       const colorsA = new Float32Array(colors)
-       pointsGeom.setAttribute( 'color', new THREE.BufferAttribute( colorsA, 3 ) );
-      
-       const pointCloud = new THREE.Points(
-        pointsGeom,
-        pointMat
-      )
-      cube.add(pointCloud)
-         
-      // setTimeout(() => {}, 5000);
 
-      setTimeout(() => {
-        cyMaterial.setValues({ emissive: "red" });
-      }, 5000);
+      const pointMat = new THREE.PointsMaterial({
+        vertexColors: true,
+        size: 0.25,
+      });
+      const colors: number[] = [];
+      const vertices = pointsGeom.getAttribute("position").array;
+      const maxY = bbox?.max.y || 0;
+      const minY = bbox?.min.y || 0;
+
+      for (var i = 0; i < vertices.length; i++) {
+        colors.push(
+          (maxY - vertices[i * 3 + 1]) / (maxY - minY),
+          1 - (maxY - vertices[i * 3 + 1]) / (maxY - minY),
+          1 - (maxY - vertices[i * 3 + 1]) / (maxY - minY)
+        );
+      }
+      const colorsA = new Float32Array(colors);
+      pointsGeom.setAttribute("color", new THREE.BufferAttribute(colorsA, 3));
+
+      const pointCloud = new THREE.Points(pointsGeom, pointMat);
+      cube.add(pointCloud);
+
+      // setTimeout(() => {
+      //   cyMaterial.setValues({ emissive: "red" });
+      // }, 5000);
 
       let red = true;
       const toggleBG = () => {
@@ -176,15 +166,15 @@ const ThreeScene: React.FC = () => {
           toggleBG();
         }, 1000);
       };
-      setTimeout(() => {
-        scene.background = new THREE.Color(0xbb4136)
-        scene.remove(parent)
-        toggleBG()
-      }, 15000)
+      // setTimeout(() => {
+      //   scene.background = new THREE.Color(0xbb4136);
+      //   scene.remove(parent);
+      //   toggleBG();
+      // }, 15000);
 
       const renderScene = () => {
         for (let i = 0; i < effectController.particleCount; i++) {
-          vertices[i * 3 + 1] -= effectController.speed / 100 ;
+          vertices[i * 3 + 1] -= effectController.speed / 100;
           const minY = cyGeometry.boundingBox?.min.y || 0;
           if (vertices[i * 3 + 1] < minY) {
             vertices[i * 3 + 1] = cyGeometry.boundingBox?.max.y || 0;
@@ -210,9 +200,20 @@ const ThreeScene: React.FC = () => {
           "position",
           new THREE.Float32BufferAttribute(vertices, 3)
         );
-        pointCloud.geometry.attributes.position.needsUpdate = true;
 
-//        stats.update();
+        const maxY = bbox?.max.y || 0;
+        const minY = bbox?.min.y || 0;
+
+        const colors = [];
+        for (var i = 0; i < vertices.length; i++) {
+          let d = (maxY - vertices[i * 3 + 1]) / (maxY - minY) + 0.1;
+          const r = d < 0.3? d : d + 0.2
+          const gb = d < 0.3? 0 : d + 0.4
+          colors.push(r, 1- gb, 1- gb)
+        }
+        const colorsA = new Float32Array(colors);
+        pointsGeom.setAttribute("color", new THREE.BufferAttribute(colorsA, 3));
+        // stats.update();
 
         renderer.render(scene, camera);
         controls.update();
@@ -220,13 +221,12 @@ const ThreeScene: React.FC = () => {
         requestAnimationFrame(renderScene);
       };
 
-
       // Render the scene and camera
       renderer.render(scene, camera);
 
       const handleResize = () => {
         const width = window.innerWidth;
-        const height = window.innerHeight;
+        const height = window.innerHeight * 0.8;
 
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
@@ -240,18 +240,18 @@ const ThreeScene: React.FC = () => {
         gui.add(effectController, "showDots").onChange(function (value) {
           pointCloud.visible = value;
         });
-        gui
-          .add(effectController, "speed", 0, 10, 1)
-          .onChange(function (value) {
-            effectController.speed = value;
-          });
+        gui.add(effectController, "speed", 0, 10, 1).onChange(function (value) {
+          effectController.speed = value;
+        });
       };
-      initGUI()
-      
-     // const stats = new Stats()
-      // controlRef.current?.appendChild(stats.dom)
+      initGUI();
 
-      // Call the renderScene function to start the animation loop
+      // const stats = new Stats();
+      // controlRef.current?.appendChild(stats.dom)
+      // const axesHelper = new THREE.AxesHelper(5);
+      // scene.add(axesHelper);
+      
+      // // Call the renderScene function to start the animation loop
       renderScene();
       // Clean up the event listener when the component is unmounted
       return () => {
@@ -273,4 +273,4 @@ const ThreeScene: React.FC = () => {
   );
 };
 
-export default ThreeScene
+export default ThreeScene;
