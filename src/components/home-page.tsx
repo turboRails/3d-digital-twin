@@ -267,8 +267,8 @@ const ThreeScene: React.FC = () => {
       <canvas className="canvas" ref={canvasRef} />
       <div className="relative mx-auto mt-4 rounded-lg  px-4 text-left leading-7 text-gray-600  sm:max-w-xl sm:px-12">
         <div className="main">
-          <Link href="/birds">Birds</Link>
-          <Link href="/boxes">Boxes</Link>
+          <Link href="/Todo">TODO</Link>
+          <Link href="/Reports">Reports</Link>
         </div>
       </div>
     </div>
