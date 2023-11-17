@@ -4,9 +4,9 @@
   "display": "standalone",
   "scope": "/",
   "start_url": "/",
-  "name": "Next.js App",
-  "short_name": "App",
-  "description": "Next.js starter template",
+  "name": "Hiso Motors Monitoring Dashboard",
+  "short_name": "K1Monitoring",
+  "description": "A starter template common to all dashboard apps in organisation",
   "icons": [
     {
       "src": "/icon-192x192.png",
