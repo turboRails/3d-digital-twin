@@ -209,8 +209,8 @@ const ThreeScene: React.FC = () => {
         const colors = []
         for (var i = 0; i < vertices.length; i++) {
           let d = (maxY - vertices[i * 3 + 1]) / (maxY - minY) + 0.1
-          const r = d < 0.3? d : d + 0.2
-          const gb = d < 0.3? 0 : d + 0.4
+          const r = d > 0.5? 0.5 : 1
+          const gb = d < 0.3? 0 : d > 0.5 ?  d + 0.4 : d + 0.2 
           colors.push(r, 1- gb, 1- gb)
         }
         const colorsA = new Float32Array(colors)
