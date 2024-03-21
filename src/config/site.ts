@@ -11,7 +11,7 @@ export const siteConfig = {
     },
   ],
   links: {
-    Energy: "/energy",
-    Heat: "/heat",
+    Energy: "/Energy",
+    Heat: "/Heat",
   },
 }
