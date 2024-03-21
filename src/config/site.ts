@@ -1,7 +1,7 @@
 export type SiteConfig = typeof siteConfig
 
 export const siteConfig = {
-  name: "A 3D digital twin",
+  name: "Digital twin in 3D",
   description:
     "Beautifully designed 3D digital twins for monitoring status",
   mainNav: [
